@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ExceptionHandling extends ResponseEntityExceptionHandler{
 	
 	private static final String INTERNAL_SERVER_ERROR_MSG = "An error occurred while processing the request";
-	private static final String PRODUCTS_NOT_FOUND = "An error occurred while processing the request";
+	
 	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<HttpResponse> handleAllException(Exception exception)
@@ -29,27 +29,20 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler{
 		return createHttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MSG);
 	}
 		
-	@ExceptionHandler(ProductNameExistException.class)
-	public ResponseEntity<HttpResponse> handleHttpMediaTypeNotSupportedException(ProductNameExistException exception)
+	@ExceptionHandler(ItemExistException.class)
+	public ResponseEntity<HttpResponse> handleHttpMediaTypeNotSupportedException(ItemExistException exception)
 	{
     	log.error(exception.getMessage());
 		return createHttpResponse(HttpStatus.CONFLICT, exception.getMessage());
 	}
 	
-	@ExceptionHandler(NoProductsFoundException.class)
-	public ResponseEntity<HttpResponse> handleNoProductsFoundException(NoProductsFoundException exception)
+	@ExceptionHandler(ItemNotFoundException.class)
+	public ResponseEntity<HttpResponse> handleNoProductsFoundException(ItemNotFoundException exception)
 	{
     	log.error(exception.getMessage());
-		return createHttpResponse(HttpStatus.NOT_FOUND, PRODUCTS_NOT_FOUND);
+		return createHttpResponse(HttpStatus.NOT_FOUND, exception.getMessage());
 	}
 	
-	@ExceptionHandler(ProductNotFoundException.class)
-	public ResponseEntity<HttpResponse> handleProductNotFoundException(ProductNotFoundException exception)
-	{
-    	log.error(exception.getMessage());
-		return createHttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage());
-	}
-
     @Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) 

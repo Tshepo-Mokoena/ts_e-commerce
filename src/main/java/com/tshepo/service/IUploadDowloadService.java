@@ -6,4 +6,6 @@ public interface IUploadDowloadService {
 
 	String uploadFile(MultipartFile file, String productId);
 
+	boolean deleteFile(String fileName);
+
 }

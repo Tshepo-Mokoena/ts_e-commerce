@@ -13,8 +13,11 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+@ApiModel(description = "category")
 @Data
 @Entity
 @Table(name = "category")
@@ -29,6 +32,7 @@ public class Category {
 	
 	@NotBlank(message = "category name should be atleast 2 characters")
 	@Size(min = 2, max = 50, message = "category name should be atleast 2 characters")
+	@ApiModelProperty(notes = "category name should be atleast 2 characters")
 	@Column(name = "category_name", nullable = false, updatable = true, length = 50)
 	private String categoryName;
 	

@@ -58,6 +58,7 @@ public class UploadDowloadService implements IUploadDowloadService{
         return fileUrlString;              
 	}
 	
+	@Override
 	public boolean deleteFile(String fileName) 
 	{		
 		Bucket bucket = storage.get(getBucketName());

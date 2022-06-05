@@ -16,11 +16,14 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+@ApiModel(description = "products")
 @Data
 @Entity
-@Table(name = "product")
+@Table(name = "products")
 public class Product {
 	
 	@Id
@@ -31,13 +34,15 @@ public class Product {
 	private String productId;
 	
 	@NotBlank(message = "Name should be atleast 2 characters")
-	@Size(min = 2, max = 50, message = "Name should be atleast 2 characters")
+	@Size(min = 2, max = 100, message = "Name should be atleast 2 characters")
+	@ApiModelProperty(notes = "Name should be atleast 2 characters")
 	@Column(name = "name", nullable = false, updatable = true, length = 50)
 	private String name;
 	
 	@NotBlank(message = "Description should be atleast 2 characters")
 	@Size(min = 2, max = 1000, message = "Description should be atleast 2 characters")
-	@Column(nullable = false, updatable = true, columnDefinition = "text" ,length = 1000)
+	@ApiModelProperty(notes = "Description should be atleast 2 characters")
+	@Column(name = "description", nullable = false, updatable = true, columnDefinition = "text" ,length = 1000)
 	private String desc;
 	
 	@Column(nullable = false, name = "quantity")
