@@ -1,7 +1,8 @@
 package com.tshepo.service;
 
-import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
 
 import com.tshepo.persistence.Product;
 
@@ -9,16 +10,22 @@ public interface IProductService {
 
 	Product newProduct(Product product);
 
-	List<Product> findAll();
+	Page<Product> findAll(int evalPage, int evalPageSize);
 
-	List<Product> activeProductList();
+	Page<Product> activeProducts(int evalPage, int evalPageSize);
 
 	Optional<Product> findByProductId(String productId);
 
 	Optional<Product> findByProductName(String name);
 
-	List<Product> productSearch(String name);
+	Page<Product> productSearch(String name, int evalPage, int evalPageSize);
 
-	void updateProduct(Product product);
+	Product updateProduct(Product product);
+
+	void updateProductActiveStatus(String productId, Boolean active);
+
+	int productCount();
+
+	void deleteProduct(Product product);
 
 }

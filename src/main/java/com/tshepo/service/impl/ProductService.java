@@ -1,11 +1,12 @@
 package com.tshepo.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,15 +39,16 @@ public class ProductService implements IProductService{
 	
 	@Transactional
 	@Override
-	public void updateProduct(Product product) 
+	public Product updateProduct(Product product) 
 	{
-		productRepository.save(product);
+		return productRepository.save(product);
 	}
 	
 	@Override
-	public List<Product> findAll() {
-		
-		return (List<Product>)productRepository.findAll();
+	public Page<Product> findAll(int evalPage, int evalPageSize) 
+	{
+		Pageable pageandSize = PageRequest.of(evalPage, evalPageSize);
+		return productRepository.findAll(pageandSize);
 	}
 	
 	@Override
@@ -61,24 +63,36 @@ public class ProductService implements IProductService{
 		return productRepository.findByName(name);
 	}
 	
-	
 	@Override
-	public List<Product> productSearch(String name) 
+	public int productCount() 
 	{
-		return productRepository.findByNameContaining(name);
+		return (int)productRepository.count();
 	}
 	
 	@Override
-	public List<Product> activeProductList() 
+	public Page<Product> productSearch(String name, int evalPage, int evalPageSize) 
 	{
-		List<Product> categories = new ArrayList<>();
-		List<Product> findCategories = (List<Product>)findAll();
-		for(Product product: findCategories)
-		{
-			if (product.isActive())
-				categories.add(product);
-		}
-		return categories;
+		Pageable pageandSize = PageRequest.of(evalPage, evalPageSize);
+		return productRepository.findByNameContaining(name, pageandSize);
 	}
-
+	
+	@Override
+	public Page<Product> activeProducts(int evalPage, int evalPageSize) 
+	{
+		Pageable pageandSize = PageRequest.of(evalPage, evalPageSize);
+		return productRepository.activeProducts(true, pageandSize);
+	}
+	
+	@Override
+	public void updateProductActiveStatus(String productId, Boolean active)
+	{
+		productRepository.activateProduct(productId, active);
+	}
+	
+	@Override
+	public void deleteProduct(Product product) 
+	{
+		productRepository.delete(product);
+	}
+	
 }

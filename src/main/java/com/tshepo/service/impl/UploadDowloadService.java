@@ -7,16 +7,15 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import com.tshepo.service.IUploadDowloadService;
+import com.tshepo.util.Utilities;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -60,9 +59,9 @@ public class UploadDowloadService implements IUploadDowloadService{
 	
 	@Override
 	public boolean deleteFile(String fileName) 
-	{		
-		Bucket bucket = storage.get(getBucketName());
-		boolean result =  bucket.get(fileName).delete();
+	{
+		BlobId blobId = BlobId.of(getBucketName(), fileName);		
+		boolean result =  storage.delete(blobId);		
 		if(result==true)
 			return true;
 		else
@@ -70,11 +69,7 @@ public class UploadDowloadService implements IUploadDowloadService{
 	}
 	
 	private String generateImageName(String originalFileName, String productId) {
-        return productId + "." + getExtension(originalFileName);
-    }
-	
-	private String getExtension(String originalFileName) {
-        return StringUtils.getFilenameExtension(originalFileName);
+        return productId + "." + Utilities.getExtension(originalFileName);
     }
 	
 	private String generateImageUrl(String bucketName, String imageName) {

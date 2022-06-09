@@ -13,10 +13,10 @@ import com.tshepo.persistence.Category;
 @Transactional(readOnly = true)
 public interface ICategoryRepository extends CrudRepository<Category, Long>{
 	
-	Optional<Category> findByCategoryName(String categoryName);
+	Optional<Category> findByName(String name);
 	
 	Optional<Category> findByCategoryId(String categoryId);
 
-	List<Category> findByCategoryNameContaining(String keyword);
+	List<Category> findByNameContaining(String keyword);
 
 }

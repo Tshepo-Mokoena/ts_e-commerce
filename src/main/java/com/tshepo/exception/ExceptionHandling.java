@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ExceptionHandling extends ResponseEntityExceptionHandler{
 	
 	private static final String INTERNAL_SERVER_ERROR_MSG = "An error occurred while processing the request";
+	private static final String FILE_UPLOAD_ERROR_MSG = "Only [ .png, .jpeg, .jpg, .gif ] are acceptable";
 	
 	
 	@ExceptionHandler(Exception.class)
@@ -27,6 +28,13 @@ public class ExceptionHandling extends ResponseEntityExceptionHandler{
 	{
     	log.error(exception.getMessage());
 		return createHttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR_MSG);
+	}
+	
+	@ExceptionHandler(FileUploadException.class)
+	public ResponseEntity<HttpResponse> handleFileUploadException(FileUploadException exception)
+	{
+    	log.error(exception.getMessage());
+		return createHttpResponse(HttpStatus.BAD_REQUEST, FILE_UPLOAD_ERROR_MSG);
 	}
 		
 	@ExceptionHandler(ItemExistException.class)

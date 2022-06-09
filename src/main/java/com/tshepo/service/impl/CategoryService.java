@@ -58,13 +58,13 @@ public class CategoryService implements ICategoryService{
 	@Override
 	public Optional<Category> findByName(String name) 
 	{
-		return categoryRepository.findByCategoryName(name);		
+		return categoryRepository.findByName(name);		
 	}
 	
 	@Override
 	public List<Category> searchCategory(String keyword) 
 	{
-		return categoryRepository.findByCategoryNameContaining(keyword);		
+		return categoryRepository.findByNameContaining(keyword);		
 	}
 
 }

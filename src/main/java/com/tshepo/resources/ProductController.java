@@ -1,24 +1,25 @@
 package com.tshepo.resources;
 
-import java.net.URI;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.tshepo.exception.*;
 import com.tshepo.persistence.Category;
@@ -29,7 +30,7 @@ import com.tshepo.service.IUploadDowloadService;
 import com.tshepo.util.Utilities;
 
 @RestController
-@RequestMapping("/api/ts-ecommerce")
+@RequestMapping("/api/ts-ecommerce/products")
 public class ProductController {
 	
 	private IProductService productService;
@@ -46,7 +47,7 @@ public class ProductController {
 		this.categoryService = categoryService;		
 	}
 	
-	@PostMapping(value = "/products", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+	@PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
 	public ResponseEntity<?> createNewProduct(@RequestPart @Valid Product product, Optional<MultipartFile> image) 
 	{		
 		if(!productService.findByProductName(product.getName()).isEmpty())
@@ -55,28 +56,27 @@ public class ProductController {
 		product.setProductId(Utilities.generateUniqueNumericUUId());
 		
 		if (!image.isEmpty()) {
+			boolean isValid = Utilities.fileExtensionValidator(image.get().getOriginalFilename());
+			if (!isValid)
+				throw new FileUploadException();
 			String imageUrl = uploadDowloadService.uploadFile(image.get(), product.getProductId());
 			product.setProductImageURL(imageUrl);
+			product.setImageName(product.getProductId()+ "."+ Utilities.getExtension(image.get().getOriginalFilename()));
 		}		
 		
 		Product savedProduct = productService.newProduct(product);
 		
-		URI locationUri = 
-				ServletUriComponentsBuilder
-				.fromCurrentRequest().path("/{productId}")
-				.buildAndExpand(savedProduct.getProductId()).toUri();
-		
-		return new ResponseEntity<>(locationUri, HttpStatus.CREATED);
+		return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
 	}
 	
-	@PostMapping(value = "/products/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+	@PostMapping(value = "/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
 	public ResponseEntity<?> updateProduct(@RequestPart @Valid Product product, Optional<MultipartFile> image) 
 	{		
 		
 		Product getProduct = productService.findByProductId(product.getProductId())
 				.orElseThrow(() -> new ItemNotFoundException(product.getProductId()));
 		
-		Product getProductByName = productService.findByProductId(product.getName()).get();
+		Product getProductByName = productService.findByProductName(product.getName()).get();
 		
 		if (getProductByName != null)
 			if (getProduct.getProductId() != getProductByName.getProductId())
@@ -95,23 +95,22 @@ public class ProductController {
 			getProduct.setPrice(product.getPrice());
 		
 		if (!image.isEmpty())
-		{
-			uploadDowloadService.deleteFile(getProduct.getProductId()+".png");
+		{			
+			boolean isValid = Utilities.fileExtensionValidator(image.get().getOriginalFilename());
+			if (!isValid)
+				throw new FileUploadException();
+			uploadDowloadService.deleteFile(getProduct.getImageName());
 			String imageUrl = uploadDowloadService.uploadFile(image.get(), getProduct.getProductId());
 			getProduct.setProductImageURL(imageUrl);
+			getProduct.setImageName(getProduct.getProductId()+ "."+ Utilities.getExtension(image.get().getOriginalFilename()));
 		}
 				
-		productService.updateProduct(getProduct);
+		Product savedProduct = productService.updateProduct(getProduct);
 		
-		URI locationUri = 
-				ServletUriComponentsBuilder
-				.fromCurrentRequest().path("/{productId}")
-				.buildAndExpand(getProduct.getProductId()).toUri();
-		
-		return new ResponseEntity<>(locationUri, HttpStatus.OK);
+		return new ResponseEntity<>(savedProduct, HttpStatus.OK);
 	}
 	
-	@GetMapping("/products/{productId}")
+	@GetMapping("/{productId}")
 	public ResponseEntity<?> getProductById(@PathVariable String  productId) 
 	{		
 		if(productId.isBlank())
@@ -122,52 +121,93 @@ public class ProductController {
 				
 		return new ResponseEntity<>(getProduct, HttpStatus.OK);
 	}
-	
-	@GetMapping("/products")
-	public ResponseEntity<?> getActiveProducts()
-	{
-		List<Product> getProductList = productService.activeProductList();
+
+	@PutMapping("/{productId}/activate")
+	public ResponseEntity<?> activateProductById(@PathVariable String  productId) 
+	{		
+		if(productId.isBlank())
+			throw new RuntimeException("product id should not be blank");
 		
-		if(!getProductList.isEmpty())
-			throw new ItemNotFoundException("[]");
-		
-		return new ResponseEntity<>(getProductList, HttpStatus.OK);
+		productService.updateProductActiveStatus(productId, true);
+				
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
-	@GetMapping("/products/all")
-	public ResponseEntity<?> getAllProducts()
-	{
-		List<Product> getProductList = productService.findAll();
+	@PutMapping("/{productId}/de-activate")
+	public ResponseEntity<?> deActivateProductById(@PathVariable String  productId) 
+	{		
+		if(productId.isBlank())
+			throw new RuntimeException("product id should not be blank");
 		
-		if(!getProductList.isEmpty())
-			throw new ItemNotFoundException("[]");
-		
-		return new ResponseEntity<>(getProductList, HttpStatus.OK);
+		productService.updateProductActiveStatus(productId, false);
+				
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 	
-	@GetMapping("/products/search/{keyword}")
-	public ResponseEntity<?> searchProduct(@PathVariable String  keyword) 
+	@GetMapping
+	public ResponseEntity<?> getActiveProducts(
+			@RequestParam("pageSize") Optional<Integer> pageSize,
+			@RequestParam("page") Optional<Integer> page)
+	{
+		if (productService.productCount() == 0)
+			throw new ItemNotFoundException("[]");
+		
+		int evalPageSize = pageSize.orElse(5);		
+		int evalPage = (page.orElse(0) < 1) ? 0 : page.get() - 1;
+		
+		Page<Product> productList = 
+				productService.activeProducts(evalPage, evalPageSize);
+		
+		return new ResponseEntity<>(productList, HttpStatus.OK);
+	}
+	
+	@GetMapping("/all")
+	public ResponseEntity<?> getAllProducts(
+			@RequestParam("pageSize") Optional<Integer> pageSize,
+			@RequestParam("page") Optional<Integer> page)
+	{
+		if (productService.productCount() == 0)
+			throw new ItemNotFoundException("[]");
+		
+		int defaultPageSize = pageSize.orElse(5);		
+		int evalPage = (page.orElse(0) < 1) ? 0 : page.get() - 1;
+		
+		Page<Product> productList = 
+				productService.findAll(evalPage, defaultPageSize);
+		
+		return new ResponseEntity<>(productList, HttpStatus.OK);
+	}
+	
+	@GetMapping("/search/{keyword}")
+	public ResponseEntity<?> searchProduct(
+			@PathVariable String  keyword,
+			@RequestParam("pageSize") Optional<Integer> pageSize,
+			@RequestParam("page") Optional<Integer> page) 
 	{		
 		if(keyword.isBlank())
 			throw new RuntimeException("product id should not be blank");
 		
-		List<Product> getProducts = productService.productSearch(keyword);
-		
-		if (getProducts.isEmpty()) 
+		if (productService.productCount() == 0)
 			throw new ItemNotFoundException("[]");
+		
+		int defaultPageSize = pageSize.orElse(5);		
+		int evalPage = (page.orElse(0) < 1) ? 0 : page.get() - 1;
+		
+		Page<Product> productList = 
+				productService.productSearch(keyword, evalPage, defaultPageSize);
 				
-		return new ResponseEntity<>(getProducts, HttpStatus.OK);
+		return new ResponseEntity<>(productList, HttpStatus.OK);
 	}
 
-	@GetMapping("/products/{productId}/categories")
+	@GetMapping("/{productId}/categories")
 	public ResponseEntity<?> getProductCategory(@PathVariable String productId)
 	{
 		List<Category> getcategoryList = productService.findByProductId(productId).get().getCategories();
 		return new ResponseEntity<>(getcategoryList, HttpStatus.OK);
 	}
 	
-	@GetMapping("/products/{productId}/category/{categoryId}")
-	public ResponseEntity<?> setProductCategory(@PathVariable String productId, @PathVariable String categoryId)
+	@PutMapping("/{productId}/add-category/{categoryId}")
+	public ResponseEntity<?> addToProduct(@PathVariable String productId, @PathVariable String categoryId)
 	{
 		if(productId.isBlank() && categoryId.isBlank())
 			throw new RuntimeException("product & category id should not be blank");
@@ -178,19 +218,36 @@ public class ProductController {
 		Category getCategory = categoryService.findByCategoryId(categoryId)
 				.orElseThrow(() -> new ItemNotFoundException(categoryId));
 		
-		List<Category> categories = new ArrayList<>();
-		categories.add(getCategory);
 		
-		List<Product> Products = new ArrayList<>();
-		Products.add(getProduct);
+		getProduct.addCategory(getCategory);
 		
-		getProduct.setCategories(categories);
-		getCategory.setProducts(Products);
+		Product savedProduct = productService.updateProduct(getProduct);		
 		
-		productService.updateProduct(getProduct);
-		categoryService.updateCategory(getCategory);
-		
-		
-		return new ResponseEntity<>( HttpStatus.OK);
+		return new ResponseEntity<>(savedProduct, HttpStatus.OK);
 	}
+	
+	@PostMapping("/{productId}/remove-category/{categoryId}")
+	public ResponseEntity<?> removeFromProduct(@PathVariable String productId, @PathVariable String categoryId)
+	{
+		if(productId.isBlank() && categoryId.isBlank())
+			throw new RuntimeException("product & category id should not be blank");
+		
+		Product getProduct = productService.findByProductId(productId)
+				.orElseThrow(() -> new ItemNotFoundException(productId));
+		
+		Category getCategory = categoryService.findByCategoryId(categoryId)
+				.orElseThrow(() -> new ItemNotFoundException(categoryId));
+		
+		
+		getProduct.removeCategory(getCategory);
+		
+		Product savedProduct = productService.updateProduct(getProduct);		
+		
+		return new ResponseEntity<>(savedProduct, HttpStatus.OK);
+	}
+	
+
+	
+	
 }
+
