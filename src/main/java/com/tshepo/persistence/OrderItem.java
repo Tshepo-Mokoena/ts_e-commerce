@@ -14,10 +14,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
 @Table(name = "order_items")
+@NoArgsConstructor
 public class OrderItem {
 	
 	@Id
@@ -63,5 +65,12 @@ public class OrderItem {
 			)
 	private LocalDateTime createdAt;
 
+	public OrderItem(Integer qty, BigDecimal subtotal, Product product, Order order) {
+		super();
+		this.qty = qty;
+		this.subtotal = subtotal;
+		this.product = product;
+		this.order = order;
+	}	
 
 }

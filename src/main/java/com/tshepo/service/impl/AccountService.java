@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tshepo.persistence.Account;
+import com.tshepo.persistence.Cart;
 import com.tshepo.persistence.auth.Role;
 import com.tshepo.persistence.repository.IAccountRepository;
 import com.tshepo.service.IAccountService;
@@ -31,6 +32,7 @@ public class AccountService implements IAccountService{
 		account.setAccountId(generateAccountId());
 		account.setPassword(SecurityUtil.passwordEncoder().encode(account.getPassword()));
 		account.setRole(Role.USER);
+		account.setCart(new Cart());
 		account.setCreatedAt(LocalDateTime.now());		
 		return accountRepository.save(account);
 	}	
