@@ -31,7 +31,7 @@ public class CartService implements ICartService{
 	@Override
 	public void clearCart(Cart cart) 
 	{
-		cart.setCartProducts(null);
+		cart.setCartItems(null);
 		cart.setTotal(BigDecimal.ZERO);
 		cartRepository.save(cart);
 	}

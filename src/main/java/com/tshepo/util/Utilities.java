@@ -37,7 +37,7 @@ public class Utilities {
 	
 	public static boolean isValidPassword(String password)
 	{
-		if(password.length() < 7) return false;
+		if(password.length() < 8) return false;
 		boolean hasDigit = false;
 		boolean hasUpperCase = false;
 		boolean hasLowerCase = false;

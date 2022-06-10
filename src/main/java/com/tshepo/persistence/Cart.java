@@ -37,7 +37,7 @@ public class Cart {
 			fetch=FetchType.LAZY
 			)
 	@JsonIgnore
-	private List<CartItem> cartProducts;
+	private List<CartItem> cartItems;
 	
 	@OneToOne(mappedBy = "cart")
 	private Account account;
