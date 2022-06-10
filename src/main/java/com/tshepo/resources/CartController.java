@@ -9,7 +9,7 @@ import com.tshepo.service.ICartService;
 import com.tshepo.service.IProductService;
 
 @RestController
-@RequestMapping("/api//api/ts-ecommerce/carts")
+@RequestMapping("/api/api/ts-ecommerce/carts")
 public class CartController {
 	
 	private ICartService cartService;

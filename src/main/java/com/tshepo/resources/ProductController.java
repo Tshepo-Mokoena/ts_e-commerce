@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tshepo.exception.*;
 import com.tshepo.persistence.Category;
 import com.tshepo.persistence.Product;
+import com.tshepo.security.AccountPrincipal;
 import com.tshepo.service.ICategoryService;
 import com.tshepo.service.IProductService;
 import com.tshepo.service.IUploadDowloadService;
@@ -40,7 +42,10 @@ public class ProductController {
 	private ICategoryService categoryService;
 	
 	@Autowired
-	private ProductController(IProductService productService, ICategoryService categoryService, IUploadDowloadService uploadDowloadService)
+	private ProductController(
+			IProductService productService, 
+			ICategoryService categoryService, 
+			IUploadDowloadService uploadDowloadService)
 	{
 		this.productService = productService;
 		this.uploadDowloadService =uploadDowloadService;
@@ -48,7 +53,9 @@ public class ProductController {
 	}
 	
 	@PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-	public ResponseEntity<?> createNewProduct(@RequestPart @Valid Product product, Optional<MultipartFile> image) 
+	public ResponseEntity<?> createNewProduct(
+			@AuthenticationPrincipal AccountPrincipal accountPrincipal,
+			@RequestPart @Valid Product product, Optional<MultipartFile> image) 
 	{		
 		if(!productService.findByProductName(product.getName()).isEmpty())
 			throw new ItemExistException(product.getName());
@@ -70,7 +77,9 @@ public class ProductController {
 	}
 	
 	@PostMapping(value = "/update", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-	public ResponseEntity<?> updateProduct(@RequestPart @Valid Product product, Optional<MultipartFile> image) 
+	public ResponseEntity<?> updateProduct(
+			@AuthenticationPrincipal AccountPrincipal accountPrincipal,
+			@RequestPart @Valid Product product, Optional<MultipartFile> image) 
 	{		
 		
 		Product getProduct = productService.findByProductId(product.getProductId())
