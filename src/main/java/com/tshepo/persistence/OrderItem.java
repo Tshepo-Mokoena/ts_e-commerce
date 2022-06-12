@@ -3,6 +3,7 @@ package com.tshepo.persistence;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -38,7 +39,7 @@ public class OrderItem {
 			)
 	private BigDecimal subtotal;
 	
-	@OneToOne
+	@OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
 	@JoinColumn(
 			nullable = false, 
 			name = "product_id"
@@ -71,6 +72,15 @@ public class OrderItem {
 		this.subtotal = subtotal;
 		this.product = product;
 		this.order = order;
-	}	
+	}
+	
+	public static OrderItem createfromCartItem(CartItem cartItem, Order order)
+	{
+		OrderItem orderItem = 
+				new OrderItem(
+						cartItem.getQty(), 
+						cartItem.getSubtotal(), cartItem.getProduct(), order);
+		return orderItem;	
+	}
 
 }
