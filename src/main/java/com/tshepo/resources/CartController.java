@@ -20,7 +20,7 @@ import com.tshepo.security.AccountPrincipal;
 import com.tshepo.service.IShoppingService;
 
 @RestController
-@RequestMapping("/api/api/ts-ecommerce/carts")
+@RequestMapping("/api/ts-ecommerce/carts")
 public class CartController {
 	
 	private IShoppingService shoppingService;
@@ -36,7 +36,7 @@ public class CartController {
 			@RequestBody CartRequest cartRequest)	
 	{					
 		return new ResponseEntity<>(
-				shoppingService.addToCart(accountPrincipal.getAccount(), 
+				shoppingService.addToCart(accountPrincipal.getEmail(), 
 						cartRequest),HttpStatus.OK);
 	}
 	
@@ -46,7 +46,7 @@ public class CartController {
 			@RequestBody CartRequest cartRequest)	
 	{					
 		return new ResponseEntity<>(
-				shoppingService.removeFromCart(accountPrincipal.getAccount(), 
+				shoppingService.removeFromCart(accountPrincipal.getEmail(), 
 						cartRequest),HttpStatus.OK);
 	}
 	
@@ -54,16 +54,16 @@ public class CartController {
 	public ResponseEntity<List<CartItem>> getCart(@AuthenticationPrincipal AccountPrincipal accountPrincipal)
 	{
 		return new ResponseEntity<>(
-				shoppingService.getCartItems(accountPrincipal.getAccount()),HttpStatus.OK);		
+				shoppingService.getCartItems(accountPrincipal.getEmail()),HttpStatus.OK);		
 	}
 	
-	@PostMapping
+	@PostMapping("/update")
 	public ResponseEntity<?> updateCart(
 			@AuthenticationPrincipal AccountPrincipal accountPrincipal,
 			@RequestBody CartRequest cartRequest)	
 	{					
 		return new ResponseEntity<>(
-				shoppingService.updateCart(accountPrincipal.getAccount(), 
+				shoppingService.updateCart(accountPrincipal.getEmail(), 
 						cartRequest),HttpStatus.OK);
 	}
 

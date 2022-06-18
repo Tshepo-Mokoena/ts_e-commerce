@@ -10,7 +10,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -71,8 +70,7 @@ public class Account {
 	@Column(name = "active", nullable = false)
 	private boolean active = false;
 		
-	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "cart_id", referencedColumnName = "id")
+	@OneToOne(cascade = CascadeType.ALL, mappedBy = "account")
 	@JsonIgnore
 	private Cart cart;
 	

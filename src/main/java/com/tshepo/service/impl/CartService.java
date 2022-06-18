@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Optional;
+import com.tshepo.persistence.Account;
 import com.tshepo.persistence.Cart;
 import com.tshepo.persistence.repository.ICartRepository;
 import com.tshepo.service.ICartService;
@@ -34,6 +36,12 @@ public class CartService implements ICartService{
 		cart.setCartItems(null);
 		cart.setTotal(BigDecimal.ZERO);
 		cartRepository.save(cart);
+	}
+
+	@Override
+	public Cart findByAccount(Account account) 
+	{		
+		return cartRepository.findByAccount(account);
 	}
 
 }

@@ -47,7 +47,7 @@ public class RegistrationService implements IRegistrationService{
 		Account currentAccount = accountService.signUp(account);
 		 
 		String token = confirmationTokenService.generateConfirmationToken(currentAccount);
-		
+		log.info(token);
 		String CONFIRMATION_URL = appConstants.appConfirmUrl();
 		log.info(CONFIRMATION_URL); 
 		 

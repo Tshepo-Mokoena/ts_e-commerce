@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.tshepo.persistence.Account;
 import com.tshepo.persistence.Cart;
 import com.tshepo.persistence.CartItem;
 import com.tshepo.persistence.Order;
@@ -32,9 +33,10 @@ public class OrderService implements IOrderService{
 	{
 		this.orderRepository = orderRepository;
 	}
-	
+		
 	@Synchronized
-	public Order newOrder(Cart cart) 
+	@Override
+	public Order newOrder(Cart cart, Account account) 
 	{
 		Order order = new Order();
 		
@@ -51,21 +53,23 @@ public class OrderService implements IOrderService{
 		}		
 		
 		order.setTotal(cart.getTotal());
-		order.setAccount(cart.getAccount());
+		order.setAccount(account);
 		order.setOrderItems(orderItems.stream().collect(Collectors.toList()));
 		order.setCreatedAt(LocalDateTime.now());
 		order.setUpdatedAt(LocalDateTime.now());
 		return  orderRepository.save(order);
 	}
 	
+	@Override
 	public List<Order> orderList() 
 	{
-		return  null;
+		return (List<Order>) orderRepository.findAll();
 	}
 	
-	public Optional<Order> findByAccount(Long id) 
+	@Override
+	public List<Order> findByAccount(Account account) 
 	{
-		return orderRepository.findById(id);
+		return orderRepository.findByAccount(account);
 	}
 
 }

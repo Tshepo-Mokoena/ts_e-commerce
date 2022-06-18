@@ -18,7 +18,6 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
-
 @Data
 @Entity
 @Table(name = "carts")
@@ -39,7 +38,7 @@ public class Cart {
 	@JsonIgnore
 	private List<CartItem> cartItems;
 	
-	@OneToOne(mappedBy = "cart")
+	@OneToOne(cascade = CascadeType.ALL)
 	private Account account;
 	
 	@Column(
@@ -54,4 +53,19 @@ public class Cart {
 			)
 	private LocalDateTime createdAt;
 
+	public static Cart setCart(
+			BigDecimal total, 
+			Account account,
+			LocalDateTime updatedAt,
+			LocalDateTime createdAt
+			) 
+	{
+		Cart cart = new Cart();
+		cart.setAccount(account);
+		cart.setUpdatedAt(updatedAt);
+		cart.setCreatedAt(createdAt);
+		cart.setTotal(total);		
+		return cart;
+	}
+	
 }

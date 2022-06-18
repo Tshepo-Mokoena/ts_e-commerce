@@ -36,7 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	{
 		return new BCryptPasswordEncoder();
 	}
-
+	
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception 
 	{
@@ -51,8 +51,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		
 		http.authorizeRequests()
-			.antMatchers("/api/api/ts-ecommerce/authentication/**").permitAll()
-			.antMatchers(HttpMethod.PUT,"/api/api/ts-ecommerce/manager-operations/**").hasRole(Role.SYSTEM_MANAGER.name())
+			.antMatchers("/api/ts-ecommerce/authentication/**").permitAll()
+			.antMatchers(HttpMethod.GET, "/api/ts-ecommerce/products/**").permitAll()
+			.antMatchers(HttpMethod.POST,"/api/ts-ecommerce/products/**").hasRole(Role.ADMIN.name())
+			.antMatchers(HttpMethod.GET,"/api/ts-ecommerce/products/all").hasRole(Role.ADMIN.name())
+			.antMatchers(HttpMethod.PUT,"/api/ts-ecommerce/manager-operations/**").hasRole(Role.SYSTEM_MANAGER.name())
 			.anyRequest().authenticated();		
 	
 		http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)

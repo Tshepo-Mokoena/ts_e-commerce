@@ -21,7 +21,7 @@ import com.tshepo.service.IAuthenticationService;
 import com.tshepo.service.IRegistrationService;
 
 @RestController
-@RequestMapping("/api/api/ts-ecommerce/authentication/")
+@RequestMapping("api/ts-ecommerce/authentication/")
 public class AuthenticationController {
 	
 	@Autowired

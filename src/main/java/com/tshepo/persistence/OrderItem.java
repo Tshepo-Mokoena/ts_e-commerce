@@ -39,7 +39,12 @@ public class OrderItem {
 			)
 	private BigDecimal subtotal;
 	
-	@OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+	@OneToOne(
+			cascade = {
+					CascadeType.PERSIST, 
+					CascadeType.REFRESH
+					}
+			)
 	@JoinColumn(
 			nullable = false, 
 			name = "product_id"
@@ -67,7 +72,6 @@ public class OrderItem {
 	private LocalDateTime createdAt;
 
 	public OrderItem(Integer qty, BigDecimal subtotal, Product product, Order order) {
-		super();
 		this.qty = qty;
 		this.subtotal = subtotal;
 		this.product = product;

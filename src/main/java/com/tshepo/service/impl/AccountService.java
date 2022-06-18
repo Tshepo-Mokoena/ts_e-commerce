@@ -1,5 +1,6 @@
 package com.tshepo.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -29,10 +30,12 @@ public class AccountService implements IAccountService{
 	@Override
 	public Account signUp(Account account) 
 	{
+		Cart cart = 
+				Cart.setCart(new BigDecimal(0), account, LocalDateTime.now(), LocalDateTime.now());		
 		account.setAccountId(generateAccountId());
 		account.setPassword(SecurityUtil.passwordEncoder().encode(account.getPassword()));
 		account.setRole(Role.USER);
-		account.setCart(new Cart());
+		account.setCart(cart);
 		account.setCreatedAt(LocalDateTime.now());		
 		return accountRepository.save(account);
 	}	

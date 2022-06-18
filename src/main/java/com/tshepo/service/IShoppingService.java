@@ -9,12 +9,12 @@ import com.tshepo.requests.CartRequest;
 
 public interface IShoppingService {
 
-	Cart addToCart(Account account, CartRequest cartRequest);
+	Cart addToCart(String account, CartRequest cartRequest);
 	
-	Cart removeFromCart(Account account, CartRequest cartRequest);
+	Cart removeFromCart(String email, CartRequest cartRequest);
 
-	List<CartItem> getCartItems(Account account);
+	List<CartItem> getCartItems(String email);
 
-	Cart updateCart(Account account, CartRequest cartRequest);
+	Cart updateCart(String email, CartRequest cartRequest);
 
 }
