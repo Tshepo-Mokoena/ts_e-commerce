@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tshepo.persistence.Order;
 import com.tshepo.persistence.OrderItem;
@@ -22,12 +23,13 @@ public class OrderItemService implements IOrderItemService{
 		this.orderItemRepository = orderItemRepository;
 	}
 
+	@Transactional
 	@Override
 	public OrderItem newOrderItem(OrderItem orderItem) 
 	{
 		orderItem.setCreatedAt(LocalDateTime.now());
 		orderItem.setUpdatedAt(LocalDateTime.now());
-		return null;
+		return orderItemRepository.save(orderItem);
 	}
 
 	@Override

@@ -38,7 +38,11 @@ public class Cart {
 	@JsonIgnore
 	private List<CartItem> cartItems;
 	
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne(
+			cascade = CascadeType.ALL,
+			fetch = FetchType.LAZY
+			)
+	@JsonIgnore
 	private Account account;
 	
 	@Column(

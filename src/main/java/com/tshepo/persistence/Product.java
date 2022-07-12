@@ -8,6 +8,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -20,6 +22,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tshepo.persistence.auth.ProductStatus;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -114,6 +117,13 @@ public class Product {
 			)
 	private boolean active = false;
 	
+	@Enumerated(EnumType.STRING)
+	@Column(
+			name = "status", 
+			nullable = true
+			)
+	private ProductStatus productStatus;
+	
 	@Column(
 			name = "created_at",
 			nullable = false,
@@ -123,17 +133,25 @@ public class Product {
 	
 	public void addCategory(Category category) 
 	{
-		if(categories == null) {
-			categories = new ArrayList<>();
-		}
+		if(categories == null) 
+			categories = new ArrayList<>();		
 		categories.add(category);
 	}
 	
 	public void removeCategory(Category category) {
-		if(categories == null) {
+		if(categories == null) 
 			categories = new ArrayList<>();
-		}
 		categories.remove(category);
+	}
+
+	public static Product createPrductFromRequest(String name, String desc, BigDecimal price, Integer qty) 
+	{
+		Product product = new Product();
+		product.setName(name);
+		product.setDesc(desc);
+		product.setPrice(price);
+		product.setQty(qty);
+		return product;
 	}
 
 }

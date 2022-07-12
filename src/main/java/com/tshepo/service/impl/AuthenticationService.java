@@ -38,7 +38,7 @@ public class AuthenticationService implements IAuthenticationService{
 						new UsernamePasswordAuthenticationToken(account.getEmail(), account.getPassword()));
 		
 		AccountPrincipal accountPrincipal = (AccountPrincipal) authentication.getPrincipal();
-			
+		
 		String jwt = jwtProvider.generateJwtToken(accountPrincipal);	
 		
 		Account signInAccount = accountPrincipal.getAccount();
@@ -48,17 +48,17 @@ public class AuthenticationService implements IAuthenticationService{
 	}
 	
 	@Override
-	public Account isValidAccount(Account account) 
+	public Account isValidAccount(String email, String password) 
 	{
-		if (StringUtils.isBlank(account.getEmail()) && StringUtils.isBlank(account.getPassword()))
+		if (StringUtils.isBlank(email) && StringUtils.isBlank(password))
 			throw new InvalidEmailOrPasswordException();
 		
-		Optional<Account> currentAccount = accountService.findByEmail(account.getEmail());
+		Optional<Account> currentAccount = accountService.findByEmail(email);
 		
 		if(!currentAccount.isPresent())
 			throw new InvalidEmailOrPasswordException();
 		
-		if (isValidPassword(account.getPassword(), currentAccount.get().getPassword()))
+		if (isValidPassword(password, currentAccount.get().getPassword()))
 			return currentAccount.get();
 		else 
 			throw new InvalidEmailOrPasswordException();

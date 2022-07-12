@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @Table(name = "confirmation_token")
-@NoArgsConstructor
 public class ConfirmationToken {
 	
 	@Id
@@ -43,12 +42,14 @@ public class ConfirmationToken {
 	@JoinColumn(nullable = false, name = "account_id")
 	private Account account;
 
-	public ConfirmationToken(String token, LocalDateTime createdAt, LocalDateTime expiresAt, 
-			Account account) {		
-		this.token = token;
-		this.createdAt = createdAt;
-		this.expiresAt = expiresAt;
-		this.account = account;
-	}
+	public static ConfirmationToken setConfirmationToken(String token, Account account) 
+	{
+		ConfirmationToken confirmationToken = new ConfirmationToken();
+		confirmationToken.setToken(token);
+		confirmationToken.setAccount(account);
+		confirmationToken.setCreatedAt(LocalDateTime.now());
+		confirmationToken.setExpiresAt(LocalDateTime.now().plusMinutes(30));
+		return confirmationToken;
+	} 
 
 }

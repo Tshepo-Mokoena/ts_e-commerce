@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tshepo.persistence.Account;
+import com.tshepo.persistence.auth.Role;
 
 @Repository
 @Transactional(readOnly = true)
@@ -21,5 +22,12 @@ public interface IAccountRepository extends CrudRepository<Account, Long>{
 	@Modifying
 	@Query("update Account set active = :active where email = :email")
 	void enableAccount(@Param("email") String email, @Param("active") Boolean active);
+
+	@Transactional
+	@Modifying
+	@Query("update Account set role = :role where email = :email")
+	void changeRoles(@Param("email") String email, @Param("role") Role role);
+
+	Optional<Account> findByAccountId(String accountId);
 
 }

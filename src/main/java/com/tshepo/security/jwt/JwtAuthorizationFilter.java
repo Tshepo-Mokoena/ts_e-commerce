@@ -23,7 +23,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter{
 	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException 
 	{
 		
-		return request.getRequestURI().startsWith("/api/api/ts-ecommerce/manager-operations");
+		return request.getRequestURI().startsWith("/api/ts-ecommerce/internal-operations");
 	}
 
 	@Override

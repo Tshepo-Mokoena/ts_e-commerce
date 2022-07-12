@@ -1,7 +1,37 @@
 package com.tshepo.util;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import com.tshepo.persistence.Account;
+import com.tshepo.persistence.Order;
+import com.tshepo.persistence.OrderItem;
+import com.tshepo.service.IEmailService;
+
+@Component
 public class EmailTemplates {
 	
+	@Autowired
+	public TemplateEngine templateEngine;
+	
+	@Autowired
+	private IEmailService emailService;
+	
+	public void orderConfirm(Account account, Order order, List<OrderItem> orderItems) 
+	{
+		Context context = new Context();
+		context.setVariable("account", account);
+		context.setVariable("order", order);
+		context.setVariable("orderItems", orderItems);
+		String text = templateEngine.process("orderTemplate", context);	
+		emailService.sendEmail(
+				account.getEmail(),
+				"Order Confirm", text);
+	}
 	
 	public static String comfirmAccount(String name, String link) 
 	{
@@ -499,7 +529,6 @@ public class EmailTemplates {
 				+ "</html>\r\n"
 				+ "";
 	}
-
 
 	public static String accountConfirmed(String firstName) 
 	{
@@ -1000,4 +1029,5 @@ public class EmailTemplates {
 				+ "</html>\r\n"
 				+ "";
 	}
+
 }

@@ -3,29 +3,32 @@ package com.tshepo.service;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.tshepo.persistence.Product;
 
 public interface IProductService {
 
-	Product newProduct(Product product);
+	Product addProduct(Product product, Optional<MultipartFile> image);
 
-	Page<Product> findAll(int evalPage, int evalPageSize);
+	Product updateProduct(Product product, Optional<MultipartFile> image);
 
-	Page<Product> activeProducts(int evalPage, int evalPageSize);
+	Product saveProduct(Product getProduct);
+
+	Page<Product> allProducts(String keyword, int evalPage, int evalPageSize);
+
+	Page<Product> activeProducts(String keyword, int evalPage, int evalPageSize);
 
 	Optional<Product> findByProductId(String productId);
 
-	Optional<Product> findByProductName(String name);
-
-	Page<Product> productSearch(String name, int evalPage, int evalPageSize);
-
-	Product updateProduct(Product product);
-
 	void updateProductActiveStatus(String productId, Boolean active);
 
-	int productCount();
-
 	void deleteProduct(Product product);
+
+	Optional<Product> findByName(String name);
+
+	Page<Product> activeCategoryProducts(String keyword, int evalPage, int evalPageSize);
+
+	Page<Product> allCategoryProducts(String keyword, int evalPage, int evalPageSize);
 
 }

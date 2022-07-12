@@ -1,29 +1,33 @@
 package com.tshepo.util;
 
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import lombok.AllArgsConstructor;
-
 @Component
-@AllArgsConstructor
 public class AppConstants {
 		
-	private Environment environment;
+	@Value("${app.home}")
+	private String homePage;
+	
+	@Value("${app.confirmation}")
+	private String confirmation;
+	
+	@Value("${app.domain}")
+	private String appDomain;
 	
 	public String appConfirmUrl() 
 	{
-		return environment.getProperty("app.confirm.url");
+		return appDomain + confirmation;
 	}
 	
 	public String appUrl() 
 	{
-		return environment.getProperty("app.home.url");
+		return appDomain;
 	}
 	
-	public String appEditAccountUrl() 
+	public String appHomePageUrl() 
 	{
-		return environment.getProperty("app.edit-account.url");
+		return appDomain + homePage;
 	}
 
 }

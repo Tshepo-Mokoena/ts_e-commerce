@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,13 +15,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @Entity
 @Table(name = "order_items")
-@NoArgsConstructor
 public class OrderItem {
 	
 	@Id
@@ -51,11 +52,15 @@ public class OrderItem {
 			)
 	private Product product;
 	
-	@ManyToOne
+	@ManyToOne(
+			cascade = CascadeType.ALL,
+			fetch = FetchType.LAZY
+			)
 	@JoinColumn(
 			nullable = false, 
 			name = "order_id"
 			)
+	@JsonIgnore
 	private Order order;
 	
 
@@ -71,19 +76,15 @@ public class OrderItem {
 			)
 	private LocalDateTime createdAt;
 
-	public OrderItem(Integer qty, BigDecimal subtotal, Product product, Order order) {
-		this.qty = qty;
-		this.subtotal = subtotal;
-		this.product = product;
-		this.order = order;
-	}
-	
 	public static OrderItem createfromCartItem(CartItem cartItem, Order order)
 	{
-		OrderItem orderItem = 
-				new OrderItem(
-						cartItem.getQty(), 
-						cartItem.getSubtotal(), cartItem.getProduct(), order);
+		Product product = cartItem.getProduct();
+		OrderItem orderItem = new OrderItem();
+		orderItem.setOrder(order);
+		orderItem.setQty(cartItem.getQty());
+		orderItem.setSubtotal(cartItem.getSubtotal());;
+		orderItem.setProduct(product);
+		orderItem.getProduct().setQty(product.getQty() - cartItem.getQty());
 		return orderItem;	
 	}
 

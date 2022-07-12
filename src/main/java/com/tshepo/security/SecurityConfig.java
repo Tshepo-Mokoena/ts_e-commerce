@@ -1,10 +1,12 @@
 package com.tshepo.security;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -15,6 +17,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -51,11 +56,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		
 		http.authorizeRequests()
-			.antMatchers("/api/ts-ecommerce/authentication/**").permitAll()
-			.antMatchers(HttpMethod.GET, "/api/ts-ecommerce/products/**").permitAll()
-			.antMatchers(HttpMethod.POST,"/api/ts-ecommerce/products/**").hasRole(Role.ADMIN.name())
-			.antMatchers(HttpMethod.GET,"/api/ts-ecommerce/products/all").hasRole(Role.ADMIN.name())
-			.antMatchers(HttpMethod.PUT,"/api/ts-ecommerce/manager-operations/**").hasRole(Role.SYSTEM_MANAGER.name())
+			.antMatchers("/api/ts-ecommerce/authentication/**", "/api/ts-ecommerce/products/**").permitAll()
+			.antMatchers("/api/ts-ecommerce/accounts").hasAnyRole(Role.ADMIN.name(), Role.MANAGER.name())
+			.antMatchers("/api/ts-ecommerce/internal/category").hasRole(Role.ADMIN.name())
+			.antMatchers("/api/ts-ecommerce/internal/products").hasRole(Role.ADMIN.name())
+			.antMatchers("/api/ts-ecommerce/internal/orders").hasRole(Role.ADMIN.name())
+			.antMatchers("/api/ts-ecommerce/internal/accounts").hasRole(Role.SYSTEM_MANAGER.name())
 			.anyRequest().authenticated();		
 	
 		http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
@@ -81,7 +87,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	{
 		return super.authenticationManagerBean();
 	}	
-	
+		
 	@Bean
 	public WebMvcConfigurer corsConfigurer() {
 		return new WebMvcConfigurer()
@@ -89,11 +95,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 					@Override
 					public void addCorsMappings(CorsRegistry registry) 
 					{
-						registry.addMapping("/**").allowedOrigins("*").allowedMethods("*");
+						registry.addMapping("/**").allowedOrigins("*").allowedMethods("*").allowedHeaders("*");
 					}
 			
 				};		
 	}
 	
-
 }

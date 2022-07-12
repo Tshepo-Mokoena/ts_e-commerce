@@ -11,5 +11,7 @@ public interface IRegistrationService {
 	void resendConfirmationToken(Account account);
 
 	void resetPassword(String email);
+
+	void newPassword(String email, String password, String newPassword);
 	
 }

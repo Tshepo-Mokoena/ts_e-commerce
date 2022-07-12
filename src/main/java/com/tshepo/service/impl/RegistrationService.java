@@ -1,14 +1,16 @@
 package com.tshepo.service.impl;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.tshepo.exception.AccountEnabledException;
 import com.tshepo.exception.EmailExistException;
 import com.tshepo.exception.EmailNotFoundException;
+import com.tshepo.exception.InvalidEmailOrPasswordException;
 import com.tshepo.exception.LinkExpiredOrNotValidException;
 import com.tshepo.persistence.Account;
 import com.tshepo.persistence.tokens.ConfirmationToken;
@@ -19,13 +21,9 @@ import com.tshepo.service.IEmailService;
 import com.tshepo.service.IRegistrationService;
 import com.tshepo.util.AppConstants;
 import com.tshepo.util.EmailTemplates;
-
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.tshepo.util.SecurityUtil;
 
 @Service
-@AllArgsConstructor
-@Slf4j
 public class RegistrationService implements IRegistrationService{
 		
 	private IAccountService accountService;
@@ -37,7 +35,18 @@ public class RegistrationService implements IRegistrationService{
 	private IAuthenticationService authenticationService;
 	
 	private AppConstants appConstants;
-		
+	
+	
+	@Autowired
+	public void setRegistrationService(IAccountService accountService, IConfirmationTokenService confirmationTokenService,
+			IEmailService emailService, IAuthenticationService authenticationService, AppConstants appConstants) {	
+		this.accountService = accountService;
+		this.confirmationTokenService = confirmationTokenService;
+		this.emailService = emailService;
+		this.authenticationService = authenticationService;
+		this.appConstants = appConstants;
+	}
+
 	@Override
 	public Account registerAccount(Account account)  
 	{
@@ -47,11 +56,10 @@ public class RegistrationService implements IRegistrationService{
 		Account currentAccount = accountService.signUp(account);
 		 
 		String token = confirmationTokenService.generateConfirmationToken(currentAccount);
-		log.info(token);
+		
 		String CONFIRMATION_URL = appConstants.appConfirmUrl();
-		log.info(CONFIRMATION_URL); 
-		 
-		emailService.sendEmail(currentAccount.getEmail(), "Confirm your Account", 
+				 
+		sendEmail(currentAccount, "Confirm your Account", 
 				EmailTemplates.comfirmAccount(currentAccount.getFirstName(), CONFIRMATION_URL + token));		  
 		 
 		return currentAccount;
@@ -71,8 +79,10 @@ public class RegistrationService implements IRegistrationService{
 			throw new LinkExpiredOrNotValidException();
 				
 		confirmationTokenService.confirmedAt(token);
+		
 		accountService.enableAccount(currentConfirmationToken.getAccount().getEmail());
-		emailService.sendEmail(currentConfirmationToken.getAccount().getEmail(), "Account Confirmed", 
+		
+		sendEmail(currentConfirmationToken.getAccount(), "Account Confirmed", 
 				EmailTemplates.accountConfirmed(currentConfirmationToken.getAccount().getFirstName()));	
 		
 		return currentConfirmationToken.getAccount();
@@ -81,7 +91,7 @@ public class RegistrationService implements IRegistrationService{
 	@Override
 	public void resendConfirmationToken(Account account) 
 	{		
-		Account authenticatedAccount = authenticationService.isValidAccount(account);		
+		Account authenticatedAccount = authenticationService.isValidAccount(account.getEmail(), account.getPassword());		
 		List<ConfirmationToken> confirmationTokens = confirmationTokenService.findByAccount(authenticatedAccount);
 		for(ConfirmationToken token: confirmationTokens)
 		{
@@ -93,10 +103,10 @@ public class RegistrationService implements IRegistrationService{
 					accountService.enableAccount(authenticatedAccount.getEmail());
 			}				
 		}		
+		
 		String token = confirmationTokenService.generateConfirmationToken(authenticatedAccount);
-		String CONFIRMATION_URL = appConstants.appConfirmUrl();		
-		log.info(CONFIRMATION_URL);
-		emailService.sendEmail(account.getEmail(), "Confirm your Account", CONFIRMATION_URL + token);
+				
+		sendEmail(account, "Confirm your Account", appConstants.appConfirmUrl() + token);
 		
 	}	
 
@@ -108,11 +118,27 @@ public class RegistrationService implements IRegistrationService{
 		
 		String password = accountService.passwordReset(account);
 		
-		log.info(password);
-		//TODO SEND RESET EMAIL
-		String PASSWORD_RESET_URL = appConstants.appConfirmUrl();
-		String token = confirmationTokenService.generateConfirmationToken(account);
-		emailService.sendEmail(account.getEmail(), "Confirm your Account", PASSWORD_RESET_URL + token);
-	}	
+		sendEmail(account, "New Password", "Your New Password: " + password);
+	}
+	
+	@Override
+	public void newPassword(String email, String password, String newPassword)
+	{
+		Account validatedAccount = authenticationService.isValidAccount(email, password);
+		
+		if (StringUtils.isBlank(newPassword))
+			throw new InvalidEmailOrPasswordException();
+		
+		validatedAccount.setPassword(SecurityUtil.passwordEncoder().encode(newPassword));
+		
+		accountService.saveAccount(validatedAccount);
+		
+		sendEmail(validatedAccount, "Password Reset Successful", "password was reset successfuly");
+	}
+	
+	private void sendEmail(Account account, String Subject, String Email)
+	{
+		emailService.sendEmail(account.getEmail(), Subject, Email);
+	}
 		
 }

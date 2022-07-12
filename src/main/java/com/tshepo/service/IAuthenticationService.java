@@ -6,6 +6,6 @@ public interface IAuthenticationService {
 	
 	Account signInAndReturnJwt(Account account);
 
-	Account isValidAccount(Account currentAccount);
+	Account isValidAccount(String email, String password);
 
 }
