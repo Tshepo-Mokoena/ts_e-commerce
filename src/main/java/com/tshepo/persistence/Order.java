@@ -18,7 +18,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tshepo.persistence.auth.OrderStatus;
 
 import lombok.Data;
@@ -40,15 +39,13 @@ public class Order {
 			cascade = CascadeType.ALL,
 			fetch=FetchType.LAZY
 			)
-	@JsonIgnore
 	private List<OrderItem> orderItems;	
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(
 			name = "account_id",
 			nullable = false
 			)
-	@JsonIgnore
 	private Account account;
 	
 	@Enumerated(EnumType.STRING)
@@ -75,7 +72,7 @@ public class Order {
 		Order order = new Order();
 		order.setTotal(cart.getTotal());
 		order.setAccount(account);
-		order.setOrderStatus(OrderStatus.NEW);
+		order.setOrderStatus(OrderStatus.PENDING);
 		order.setCreatedAt(LocalDateTime.now());
 		order.setUpdatedAt(LocalDateTime.now());
 		return order;	

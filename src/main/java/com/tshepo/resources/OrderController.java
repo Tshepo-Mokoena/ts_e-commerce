@@ -1,6 +1,5 @@
 package com.tshepo.resources;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,6 @@ import com.tshepo.exception.ItemNotFoundException;
 import com.tshepo.persistence.Account;
 import com.tshepo.persistence.Cart;
 import com.tshepo.persistence.Order;
-import com.tshepo.persistence.OrderItem;
 import com.tshepo.security.AccountPrincipal;
 import com.tshepo.service.IAccountService;
 import com.tshepo.service.ICartService;
@@ -44,14 +42,9 @@ public class OrderController {
 	private IOrderItemService orderItemService;
 	
 	@Autowired
-	private void setOrderController(
-			ICartService cartService, 
-			IOrderService orderService,
-			IEmailService emailService,
-			IAccountService accountService,
-			IOrderItemService orderItemService)
+	private void setOrderController(ICartService cartService, IOrderService orderService, IEmailService emailService, IAccountService accountService, IOrderItemService orderItemService)
 	{
-		this. orderService = orderService;
+		this.orderService = orderService;
 		this.cartService = cartService;
 		this.emailService = emailService;
 		this.accountService = accountService;
@@ -67,73 +60,40 @@ public class OrderController {
 		Cart cart = cartService.findByAccount(account);
 				
 		Order order = orderService.newOrder(cart, account);
-		
-		cartService.clearCart(cart);
 				
-		EmailTemplates email = new EmailTemplates();
-		
-		email.orderConfirm(account, order, orderItemService.findByOrder(order));
+//		EmailTemplates email = new EmailTemplates();
+//		
+//		email.orderConfirm(account, order, orderItemService.findByOrder(order));
 		
 		return new ResponseEntity<>(order, HttpStatus.CREATED);
 	}
 
 	@GetMapping
-	public ResponseEntity<?> getOrders(
-			@AuthenticationPrincipal AccountPrincipal accountPrincipal,
-			@RequestParam("pageSize") Optional<Integer> pageSize,
-			@RequestParam("page") Optional<Integer> page) 
+	public ResponseEntity<?> getOrders(@AuthenticationPrincipal AccountPrincipal accountPrincipal,
+			@RequestParam("pageSize") Optional<Integer> pageSize, @RequestParam("page") Optional<Integer> page) 
 	{
-		int evalPageSize = pageSize.orElse(5);		
-		int evalPage = (page.orElse(0) < 1) ? 0 : page.get() - 1;
-		return new ResponseEntity<>(
-				findOrdersByAccount(
-						findAccount(accountPrincipal.getEmail()), evalPage, evalPageSize), HttpStatus.OK);
+		return new ResponseEntity<>(findOrdersByAccount(findAccount(accountPrincipal.getEmail()), page.orElse(0), pageSize.orElse(5)), 
+				HttpStatus.OK);
 	}
 	
 	@GetMapping("/{orderId}")
 	public ResponseEntity<?> getOrder(@AuthenticationPrincipal AccountPrincipal accountPrincipal, @PathVariable Long orderId)
-	{	
-		Order getOrder = null;
-		
-		List<Order> orders = orderService.findByAccount(findAccount(accountPrincipal.getEmail()));
-		
-		if (orders.isEmpty())		
-			throw new ItemNotFoundException("[]");
-		
-		for (Order order : orders)
-		{
-			if (order.getId().equals(orderId))
-				getOrder = order;			
-		}
-		return new ResponseEntity<>(getOrder, HttpStatus.OK);
-	}
+	{					
+		return new ResponseEntity<>(findById(orderId).orElseThrow(() -> new  ItemNotFoundException(orderId.toString())), HttpStatus.OK);
+	}	
 	
 	@GetMapping("/{orderId}/order-items")
 	public ResponseEntity<?> getOrderItems(@AuthenticationPrincipal AccountPrincipal accountPrincipal, @PathVariable Long orderId)
-	{	
-		Order getOrder = null;
-		
-		for (Order order : orderService.findByAccount(findAccount(accountPrincipal.getEmail())))
-		{
-			if (order.getId() == orderId)
-				getOrder = order;
-		}
-		
-		List<OrderItem> orderItems = orderItemService.findByOrder(getOrder);
-		
-		return new ResponseEntity<>(orderItems, HttpStatus.OK);
+	{			
+		return new ResponseEntity<>(orderItemService.findByOrder(findById(orderId).orElseThrow(() -> new  ItemNotFoundException(orderId.toString()))), 
+				HttpStatus.OK);
 	}
 	
-	private Account findAccount(String email) 
-	{
-		return accountService.findByEmail(email).orElseThrow(() -> new EmailNotFoundException(email));		
-	}
+	private Account findAccount(String email) { return accountService.findByEmail(email).orElseThrow(() -> new EmailNotFoundException(email)); }
 	
-	private Page<Order> findOrdersByAccount(Account account, int evalPage, int evalPageSize)
-	{
-		return orderService.findByAccount(account, evalPage, evalPageSize);
-	}
+	private Page<Order> findOrdersByAccount(Account account, int evalPage, int evalPageSize) { return orderService.findByAccount(account, evalPage, evalPageSize); }
 	
+	private Optional<Order> findById(Long orderId) { return orderService.findById(orderId); }	
 	
 
 }

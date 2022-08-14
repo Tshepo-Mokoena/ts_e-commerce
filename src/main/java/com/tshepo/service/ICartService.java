@@ -8,11 +8,11 @@ public interface ICartService {
 	
 	Cart addToCart(Account account, CartRequest cartRequest);
 	
-	Cart removeFromCart(Account account, CartRequest cartRequest);
+	Cart removeFromCart(Account account, String productId);
 	
 	Cart updateCart(Account account, CartRequest cartRequest);
 		
-	Cart clearCart(Cart cart);
+	Cart clearCart(Account account);
 
 	Cart findByAccount(Account account);
 

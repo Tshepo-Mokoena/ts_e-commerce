@@ -29,9 +29,7 @@ public interface IProductRepository  extends PagingAndSortingRepository<Product,
 	
 	@Modifying
 	@Query("update Product set active = :active where productId = :productId")
-	void activateProduct(
-			@Param("productId") String productId, 
-			@Param("active") Boolean active);	
+	void activateProduct(@Param("productId") String productId, @Param("active") Boolean active);	
 	
 //	@Query("select s from Product s where active = :active and name like %?1%")
 //	Page<Product> activeProducts(

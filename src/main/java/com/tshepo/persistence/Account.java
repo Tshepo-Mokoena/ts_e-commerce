@@ -74,6 +74,18 @@ public class Account {
 	@OneToOne(cascade = CascadeType.ALL, mappedBy = "account", fetch = FetchType.LAZY)
 	@JsonIgnore
 	private Cart cart;
+	
+	@OneToOne(cascade = CascadeType.ALL, mappedBy = "account", fetch = FetchType.LAZY)
+	@JsonIgnore
+	private Address address;
+	
+
+	@OneToOne(cascade = CascadeType.ALL, mappedBy = "account", fetch = FetchType.LAZY)
+	@JsonIgnore
+	private Payment payment;
+	
+	@Column(name = "updated_at", nullable = false)
+	private LocalDateTime updatedAt;
 
 	@Column(name = "created_at", nullable = false)
 	private LocalDateTime createdAt;

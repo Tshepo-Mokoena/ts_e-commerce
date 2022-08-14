@@ -38,16 +38,12 @@ public class CartService implements ICartService{
 	}	
 
 	@Override
-	public Cart findByAccount(Account account) 
-	{		
-		return cartRepository.findByAccount(account);
-	}
-
-	@Override
 	public Cart addToCart(Account account, CartRequest cartRequest) 
 	{
 		Cart cart = findByAccount(account);
-				
+		
+		if(cartRequest.getQuantity() < 1) {cartRequest.setQuantity(1);}
+		
 		Product product = productService.findByProductId(cartRequest.getProductId())
 				.orElseThrow(() -> new ItemNotFoundException(cartRequest.getProductId()) ); 
 				
@@ -57,8 +53,7 @@ public class CartService implements ICartService{
 		{
 			if (cartItem.getProduct().getProductId().contains(product.getProductId()))
 			{		
-				Cart updateCart = updateCartItem(cart, cartItem, cartRequest);
-				
+				Cart updateCart = updateCartItem(cart, cartItem, cartRequest);				
 				return updateCart;
 			}
 		}	
@@ -82,17 +77,17 @@ public class CartService implements ICartService{
 	}
 
 	@Override
-	public Cart removeFromCart(Account account, CartRequest cartRequest) 
+	public Cart removeFromCart(Account account, String productId) 
 	{
 		Cart cart = findByAccount(account);
 		
-		Product product = productService.findByProductId(cartRequest.getProductId())
-				.orElseThrow(() -> new ItemNotFoundException(cartRequest.getProductId()));
+		Product product = productService.findByProductId(productId)
+				.orElseThrow(() -> new ItemNotFoundException(productId));
 		
 		Optional<CartItem> getCartItem = cartItemService.findByProduct(product);
 		
 		if (!getCartItem.isPresent())
-			throw new ItemNotFoundException(cartRequest.getProductId());
+			throw new ItemNotFoundException(productId);
 		
 		cartItemService.removeCartItem(getCartItem.get());
 		
@@ -110,18 +105,14 @@ public class CartService implements ICartService{
 	}
 
 	@Override
-	public Cart clearCart(Cart cart) 
+	public Cart clearCart(Account account) 
 	{
-		List<CartItem> cartItems = cartItemService.findByCart(cart);
-		
-		if (cartItems.isEmpty())
-			throw new ItemNotFoundException("[]");
-		
+		Cart cart = getCart(account);
+		List<CartItem> cartItems = cartItemService.findByCart(cart);				
 		for (CartItem cartItem : cartItems)
 		{
 			cartItemService.removeCartItem(cartItem);
-		}
-		
+		}		
 		cart.setTotal(BigDecimal.ZERO);
 		cart.setUpdatedAt(LocalDateTime.now());
 		return cartRepository.save(cart);
@@ -158,6 +149,8 @@ public class CartService implements ICartService{
 	{
 		Cart cart = findByAccount(account);
 		
+		if(cartRequest.getQuantity() < 1) {cartRequest.setQuantity(1);}
+		
 		Product product = productService.findByProductId(cartRequest.getProductId())
 				.orElseThrow(() -> new ItemNotFoundException(cartRequest.getProductId()));
 		
@@ -177,9 +170,9 @@ public class CartService implements ICartService{
 	}
 
 	@Override
-	public Cart getCart(Account account) 
-	{
-		return findByAccount(account);
-	}
+	public Cart getCart(Account account) { return findByAccount(account); }
+	
+	@Override
+	public Cart findByAccount(Account account) { return cartRepository.findByAccount(account); }
 
 }

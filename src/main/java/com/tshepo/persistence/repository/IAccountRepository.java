@@ -2,6 +2,8 @@ package com.tshepo.persistence.repository;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -29,5 +31,7 @@ public interface IAccountRepository extends CrudRepository<Account, Long>{
 	void changeRoles(@Param("email") String email, @Param("role") Role role);
 
 	Optional<Account> findByAccountId(String accountId);
+
+	Page<Account> findByFirstNameContaining(String keyword, Pageable pageable);
 
 }

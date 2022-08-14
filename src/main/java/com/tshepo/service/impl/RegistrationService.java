@@ -126,8 +126,7 @@ public class RegistrationService implements IRegistrationService{
 	{
 		Account validatedAccount = authenticationService.isValidAccount(email, password);
 		
-		if (StringUtils.isBlank(newPassword))
-			throw new InvalidEmailOrPasswordException();
+		if (StringUtils.isBlank(newPassword)) throw new InvalidEmailOrPasswordException();
 		
 		validatedAccount.setPassword(SecurityUtil.passwordEncoder().encode(newPassword));
 		

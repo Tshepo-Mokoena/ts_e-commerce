@@ -11,6 +11,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -31,17 +32,17 @@ public class Cart {
 	private BigDecimal total;
 	
 	@OneToMany(
-			mappedBy="cart", 
-			cascade=CascadeType.ALL, 
+			mappedBy = "cart", 
+			cascade = CascadeType.ALL, 
 			fetch=FetchType.LAZY
 			)
-	@JsonIgnore
 	private List<CartItem> cartItems;
 	
 	@OneToOne(
 			cascade = CascadeType.ALL,
 			fetch = FetchType.LAZY
 			)
+	@JoinColumn(name = "account_id", nullable = false)
 	@JsonIgnore
 	private Account account;
 	
@@ -57,12 +58,7 @@ public class Cart {
 			)
 	private LocalDateTime createdAt;
 
-	public static Cart setCart(
-			BigDecimal total, 
-			Account account,
-			LocalDateTime updatedAt,
-			LocalDateTime createdAt
-			) 
+	public static Cart setCart(BigDecimal total, Account account, LocalDateTime updatedAt, LocalDateTime createdAt) 
 	{
 		Cart cart = new Cart();
 		cart.setAccount(account);

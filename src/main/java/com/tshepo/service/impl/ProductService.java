@@ -51,7 +51,6 @@ public class ProductService implements IProductService{
 			product.setProductImageURL(imageUrl);
 			product.setImageName(product.getProductId()+ "."+ Utilities.getExtension(image.get().getOriginalFilename()));
 		}
-		product.setActive(false);
 		product.setCreatedAt(LocalDateTime.now());
 		return productRepository.save(product);
 	}
@@ -64,7 +63,7 @@ public class ProductService implements IProductService{
 		{			
 			boolean isValid = Utilities.fileExtensionValidator(image.get().getOriginalFilename());
 			if (!isValid) throw new FileUploadException();
-			deleteFile(product.getImageName());
+			if (product.getImageName() != null) deleteFile(product.getImageName());			
 			String imageUrl = uploadDowloadService.uploadFile(image.get(), product.getProductId());
 			product.setProductImageURL(imageUrl);
 			product.setImageName(product.getProductId()+ "."+ Utilities.getExtension(image.get().getOriginalFilename()));
@@ -76,8 +75,11 @@ public class ProductService implements IProductService{
 	@Override
 	public void deleteProduct(Product product)
 	{
-		deleteFile(product.getImageName());
-		productRepository.delete(product); 
+		if (product.getImageName() == null) productRepository.delete(product);
+		else {
+			deleteFile(product.getImageName());
+			productRepository.delete(product);
+		}		
 	}
 	
 	@Override

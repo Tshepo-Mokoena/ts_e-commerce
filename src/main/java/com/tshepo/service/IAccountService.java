@@ -1,7 +1,8 @@
 package com.tshepo.service;
 
-import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
 
 import com.tshepo.persistence.Account;
 import com.tshepo.persistence.auth.Role;
@@ -16,14 +17,14 @@ public interface IAccountService {
 	
 	String passwordReset(Account account);
 
-	List<Account> getAllAccounts();
-
 	void changeRole(String email, Role admin);
 
 	Optional<Account> findByAccountId(String accountId);
 
 	Account lockStatus(Account account, Boolean status);
 
-	void saveAccount(Account account);
+	Account saveAccount(Account account);
+
+	Page<Account> getAccounts(String keyword, int page, int pageSize);
 
 }

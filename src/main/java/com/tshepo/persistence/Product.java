@@ -5,12 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,9 +16,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.tshepo.persistence.auth.ProductStatus;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -36,6 +29,12 @@ public class Product {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(
+			name = "id", 
+			nullable = false, 
+			updatable = false, 
+			unique = true
+			)
 	private Long id;
 	
 	@Column(
@@ -56,8 +55,9 @@ public class Product {
 	@Column(
 			name = "name", 
 			nullable = false, 
-			updatable = true, 
-			length = 50)
+			updatable = true,
+			unique = true,
+			length = 100)
 	private String name;
 	
 	@NotBlank(message = "Description should be atleast 2 characters")
@@ -100,16 +100,13 @@ public class Product {
 			)
 	private String imageName;
 	
-	@ManyToMany(
-			cascade = CascadeType.ALL,
-			fetch = FetchType.LAZY
-			)
+	@ManyToMany
     @JoinTable(
     		name = "product_categories", 
     		joinColumns = @JoinColumn(name = "product_id"), 
-    		inverseJoinColumns = @JoinColumn(name = "category_id"))
-	@JsonIgnore
-    private List<Category> categories;
+    		inverseJoinColumns = @JoinColumn(name = "category_id")
+    		)
+    private List<Category> categories = new ArrayList<>();
 	
 	@Column(
 			name = "active", 
@@ -117,41 +114,11 @@ public class Product {
 			)
 	private boolean active = false;
 	
-	@Enumerated(EnumType.STRING)
-	@Column(
-			name = "status", 
-			nullable = true
-			)
-	private ProductStatus productStatus;
-	
 	@Column(
 			name = "created_at",
 			nullable = false,
 			updatable = false
 			)
-	private LocalDateTime createdAt;
-	
-	public void addCategory(Category category) 
-	{
-		if(categories == null) 
-			categories = new ArrayList<>();		
-		categories.add(category);
-	}
-	
-	public void removeCategory(Category category) {
-		if(categories == null) 
-			categories = new ArrayList<>();
-		categories.remove(category);
-	}
-
-	public static Product createPrductFromRequest(String name, String desc, BigDecimal price, Integer qty) 
-	{
-		Product product = new Product();
-		product.setName(name);
-		product.setDesc(desc);
-		product.setPrice(price);
-		product.setQty(qty);
-		return product;
-	}
+	private LocalDateTime createdAt;		
 
 }

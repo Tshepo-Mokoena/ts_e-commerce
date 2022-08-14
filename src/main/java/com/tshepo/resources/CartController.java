@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,16 +44,15 @@ public class CartController {
 	@PostMapping
 	public ResponseEntity<?> addToCart(@AuthenticationPrincipal AccountPrincipal accountPrincipal, @RequestBody CartRequest cartRequest) 
 	{				
-		return new ResponseEntity<>(cartService.addToCart(
-				findAccount(accountPrincipal.getEmail()), cartRequest), HttpStatus.OK);
+		cartService.addToCart(findAccount(accountPrincipal.getEmail()), cartRequest);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
-	@DeleteMapping
-	public ResponseEntity<?> removeFromCart(@AuthenticationPrincipal AccountPrincipal accountPrincipal,
-			@RequestBody CartRequest cartRequest) 
+	@DeleteMapping("/{productId}")
+	public ResponseEntity<?> removeFromCart(@AuthenticationPrincipal AccountPrincipal accountPrincipal, @PathVariable("productId") String productId) 
 	{		
-		return new ResponseEntity<>(cartService.removeFromCart(findAccount(accountPrincipal.getEmail()), cartRequest),
-				HttpStatus.OK);
+		cartService.removeFromCart(findAccount(accountPrincipal.getEmail()), productId);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@GetMapping
@@ -61,18 +61,11 @@ public class CartController {
 		return new ResponseEntity<>(cartService.getCart(findAccount(accountPrincipal.getEmail())), HttpStatus.OK);
 	}
 	
-	@GetMapping("/cart-items")
-	public ResponseEntity<List<CartItem>> getCartItems(@AuthenticationPrincipal AccountPrincipal accountPrincipal) 
-	{		
-		return new ResponseEntity<>(cartItemService.findByCart(cartService.getCart(findAccount(accountPrincipal.getEmail()))) , HttpStatus.OK);
-	}
-
-	@PostMapping("/update")
-	public ResponseEntity<?> updateCart(@AuthenticationPrincipal AccountPrincipal accountPrincipal,
-			@RequestBody CartRequest cartRequest) 
-	{		
-		return new ResponseEntity<>(cartService.updateCart(findAccount(accountPrincipal.getEmail()), cartRequest),
-				HttpStatus.OK);
+	@GetMapping("/clear")
+	public ResponseEntity<?> clearCart(@AuthenticationPrincipal AccountPrincipal accountPrincipal)
+	{
+		cartService.clearCart(findAccount(accountPrincipal.getEmail()));
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	private Account findAccount(String email) 

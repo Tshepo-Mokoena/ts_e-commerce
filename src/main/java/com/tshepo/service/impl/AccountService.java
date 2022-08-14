@@ -2,14 +2,17 @@ package com.tshepo.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.tshepo.persistence.Account;
+import com.tshepo.persistence.Address;
 import com.tshepo.persistence.Cart;
+import com.tshepo.persistence.Payment;
 import com.tshepo.persistence.auth.Role;
 import com.tshepo.persistence.repository.IAccountRepository;
 import com.tshepo.service.IAccountService;
@@ -22,10 +25,7 @@ public class AccountService implements IAccountService{
 	private IAccountRepository accountRepository;
 
 	@Autowired
-	private void setAccountService(IAccountRepository accountRepository)
-	{
-		this.accountRepository = accountRepository;
-	}
+	private void setAccountService(IAccountRepository accountRepository) {this.accountRepository = accountRepository;}
 	
 	@Override
 	public Account signUp(Account account) 
@@ -33,16 +33,17 @@ public class AccountService implements IAccountService{
 		account.setAccountId(Utilities.generateUniqueNumericUUId());
 		account.setPassword(SecurityUtil.passwordEncoder().encode(account.getPassword()));
 		account.setRole(Role.USER);
+		account.setActive(true);
 		account.setCart(Cart.setCart(new BigDecimal(0), account, LocalDateTime.now(), LocalDateTime.now()));
+		account.setAddress(Address.setAddress(account));
+		account.setPayment(Payment.setPayment(account));
+		account.setUpdatedAt(LocalDateTime.now());
 		account.setCreatedAt(LocalDateTime.now());		
 		return accountRepository.save(account);
 	}	
 
 	@Override
-	public void enableAccount(String email) 
-	{		
-		accountRepository.enableAccount(email, true);
-	}
+	public void enableAccount(String email) {accountRepository.enableAccount(email, true);}
 
 	@Override
 	public String passwordReset(Account account)
@@ -54,28 +55,13 @@ public class AccountService implements IAccountService{
 	}
 
 	@Override
-	public Optional<Account> findByEmail(String email) 
-	{
-		return accountRepository.findByEmail(email);
-	}
+	public Optional<Account> findByEmail(String email) {return accountRepository.findByEmail(email);}
 	
 	@Override
-	public List<Account> getAllAccounts() 
-	{
-		return (List<Account>) accountRepository.findAll();
-	}
+	public void changeRole(String email, Role role) {accountRepository.changeRoles(email, role);}
 
 	@Override
-	public void changeRole(String email, Role role) 
-	{
-		accountRepository.changeRoles(email, role);
-	}
-
-	@Override
-	public Optional<Account> findByAccountId(String accountId) 
-	{
-		return accountRepository.findByAccountId(accountId);
-	}
+	public Optional<Account> findByAccountId(String accountId) {return accountRepository.findByAccountId(accountId);}
 
 	@Override
 	public Account lockStatus(Account account, Boolean status) 
@@ -85,9 +71,13 @@ public class AccountService implements IAccountService{
 	}
 	
 	@Override
-	public void saveAccount(Account account)
+	public Account saveAccount(Account account)
 	{
-		accountRepository.save(account);
+		account.setUpdatedAt(LocalDateTime.now());
+		return accountRepository.save(account);
 	}
+
+	@Override
+	public Page<Account> getAccounts(String keyword, int page, int pageSize){ return accountRepository.findByFirstNameContaining(keyword, PageRequest.of(page, pageSize));}
 
 }

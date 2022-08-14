@@ -58,6 +58,7 @@ public class UploadDowloadService implements IUploadDowloadService{
 	}
 	
 	@Override
+	@Async
 	public boolean deleteFile(String fileName) 
 	{
 		BlobId blobId = BlobId.of(getBucketName(), fileName);		

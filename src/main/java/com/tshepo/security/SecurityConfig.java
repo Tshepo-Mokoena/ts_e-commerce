@@ -1,8 +1,5 @@
 package com.tshepo.security;
 
-import java.util.Arrays;
-import java.util.Collections;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -34,6 +31,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	@Value("${authentication.internal-api-key}")
 	private String internalApiKey;
 	
+	private static final String[] PUBLIC_URLS = {
+			"/api/ts-ecommerce/authentication/**",
+			"/api/ts-ecommerce/products",
+			"/api/ts-ecommerce/products/**",
+			"/api/ts-ecommerce/category",
+			"/api/ts-ecommerce/category/**"
+			};
+	
 	@Autowired
 	private AccountSecurityService accountSecurityService;
 	
@@ -56,12 +61,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		
 		http.authorizeRequests()
-			.antMatchers("/api/ts-ecommerce/authentication/**", "/api/ts-ecommerce/products/**").permitAll()
-			.antMatchers("/api/ts-ecommerce/accounts").hasAnyRole(Role.ADMIN.name(), Role.MANAGER.name())
+			.antMatchers( PUBLIC_URLS ).permitAll()
 			.antMatchers("/api/ts-ecommerce/internal/category").hasRole(Role.ADMIN.name())
 			.antMatchers("/api/ts-ecommerce/internal/products").hasRole(Role.ADMIN.name())
 			.antMatchers("/api/ts-ecommerce/internal/orders").hasRole(Role.ADMIN.name())
-			.antMatchers("/api/ts-ecommerce/internal/accounts").hasRole(Role.SYSTEM_MANAGER.name())
+			.antMatchers("/api/ts-ecommerce/internal/accounts").hasRole(Role.ADMIN.name())
+			.antMatchers("/api/ts-ecommerce/internal-operations/**").hasRole(Role.SYSTEM_MANAGER.name())
 			.anyRequest().authenticated();		
 	
 		http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)

@@ -40,22 +40,14 @@ public class OrderItem {
 			)
 	private BigDecimal subtotal;
 	
-	@OneToOne(
-			cascade = {
-					CascadeType.PERSIST, 
-					CascadeType.REFRESH
-					}
-			)
+	@OneToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(
 			nullable = false, 
 			name = "product_id"
 			)
 	private Product product;
 	
-	@ManyToOne(
-			cascade = CascadeType.ALL,
-			fetch = FetchType.LAZY
-			)
+	@ManyToOne
 	@JoinColumn(
 			nullable = false, 
 			name = "order_id"

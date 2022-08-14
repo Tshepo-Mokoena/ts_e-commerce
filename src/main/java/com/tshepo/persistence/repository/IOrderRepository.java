@@ -1,7 +1,5 @@
 package com.tshepo.persistence.repository;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -19,7 +17,5 @@ public interface IOrderRepository extends PagingAndSortingRepository<Order, Long
 	Page<Order> findByAccount(Account account, Pageable pageable);
 
 	Page<Order> findByOrderStatus(OrderStatus orderStatus, Pageable pageandSize);
-
-	List<Order> findByAccount(Account account);
 
 }
