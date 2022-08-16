@@ -32,7 +32,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	private String internalApiKey;
 	
 	private static final String[] PUBLIC_URLS = {
-			"/test/**",
 			"/api/ts-ecommerce/authentication/**",
 			"/api/ts-ecommerce/products",
 			"/api/ts-ecommerce/products/**",
