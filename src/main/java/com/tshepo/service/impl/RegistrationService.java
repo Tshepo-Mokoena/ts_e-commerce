@@ -30,7 +30,7 @@ public class RegistrationService implements IRegistrationService{
 	
 	private IConfirmationTokenService confirmationTokenService;
 	
-	private IEmailService emailService;
+	private EmailTemplates emailTemplate;
 	
 	private IAuthenticationService authenticationService;
 	
@@ -39,10 +39,10 @@ public class RegistrationService implements IRegistrationService{
 	
 	@Autowired
 	public void setRegistrationService(IAccountService accountService, IConfirmationTokenService confirmationTokenService,
-			IEmailService emailService, IAuthenticationService authenticationService, AppConstants appConstants) {	
+			IEmailService emailService, IAuthenticationService authenticationService, AppConstants appConstants, EmailTemplates emailTemplate) {	
 		this.accountService = accountService;
 		this.confirmationTokenService = confirmationTokenService;
-		this.emailService = emailService;
+		this.emailTemplate = emailTemplate;
 		this.authenticationService = authenticationService;
 		this.appConstants = appConstants;
 	}
@@ -57,10 +57,7 @@ public class RegistrationService implements IRegistrationService{
 		 
 		String token = confirmationTokenService.generateConfirmationToken(currentAccount);
 		
-		String CONFIRMATION_URL = appConstants.appConfirmUrl();
-				 
-		sendEmail(currentAccount, "Confirm your Account", 
-				EmailTemplates.comfirmAccount(currentAccount.getFirstName(), CONFIRMATION_URL + token));		  
+		emailTemplate.emailConfirm(currentAccount, appConstants.appConfirmUrl() + token);				 		  
 		 
 		return currentAccount;
 		 
@@ -82,9 +79,8 @@ public class RegistrationService implements IRegistrationService{
 		
 		accountService.enableAccount(currentConfirmationToken.getAccount().getEmail());
 		
-		sendEmail(currentConfirmationToken.getAccount(), "Account Confirmed", 
-				EmailTemplates.accountConfirmed(currentConfirmationToken.getAccount().getFirstName()));	
-		
+		emailTemplate.emailConfirmed(currentConfirmationToken.getAccount(), appConstants.appHomePageUrl());
+				
 		return currentConfirmationToken.getAccount();
 	}
 	
@@ -105,20 +101,19 @@ public class RegistrationService implements IRegistrationService{
 		}		
 		
 		String token = confirmationTokenService.generateConfirmationToken(authenticatedAccount);
-				
-		sendEmail(account, "Confirm your Account", appConstants.appConfirmUrl() + token);
+		
+		emailTemplate.emailConfirm(account, appConstants.appConfirmUrl() + token);
 		
 	}	
 
 	@Override
 	public void resetPassword(String email) 
 	{
-		Account account = accountService.findByEmail(email)
-				.orElseThrow(() -> new EmailNotFoundException());
+		Account account = accountService.findByEmail(email).orElseThrow(() -> new EmailNotFoundException());
+				
+		account.setPassword(accountService.passwordReset(account));
 		
-		String password = accountService.passwordReset(account);
-		
-		sendEmail(account, "New Password", "Your New Password: " + password);
+		emailTemplate.passwordReset(account, appConstants.appHomePageUrl());
 	}
 	
 	@Override
@@ -132,12 +127,8 @@ public class RegistrationService implements IRegistrationService{
 		
 		accountService.saveAccount(validatedAccount);
 		
-		sendEmail(validatedAccount, "Password Reset Successful", "password was reset successfuly");
+		emailTemplate.passwordUpdated(validatedAccount, appConstants.appHomePageUrl());
 	}
 	
-	private void sendEmail(Account account, String Subject, String Email)
-	{
-		emailService.sendEmail(account.getEmail(), Subject, Email);
-	}
 		
 }
