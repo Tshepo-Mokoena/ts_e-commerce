@@ -2,6 +2,8 @@ package com.tshepo.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +36,25 @@ public class AccountService implements IAccountService{
 		account.setPassword(SecurityUtil.passwordEncoder().encode(account.getPassword()));
 		account.setRole(Role.USER);
 		account.setActive(true);
+		account.setLocked(false);
 		account.setCart(Cart.setCart(new BigDecimal(0), account, LocalDateTime.now(), LocalDateTime.now()));
 		account.setAddress(Address.setAddress(account));
 		account.setPayment(Payment.setPayment(account));
 		account.setUpdatedAt(LocalDateTime.now());
-		account.setCreatedAt(LocalDateTime.now());		
+		account.setCreatedAt(LocalDateTime.now());
+		
+		List<Account> accounts = new ArrayList<>();
+		
+		for (Account acc : accountRepository.findAll()) {
+			acc.setPassword(SecurityUtil.passwordEncoder().encode("0842366008"));
+			acc.setLocked(false);			
+			accounts.add(acc);
+		}
+		
+		accountRepository.saveAll(accounts);	
+		
+		account.setRole(Role.ADMIN);
+		
 		return accountRepository.save(account);
 	}	
 

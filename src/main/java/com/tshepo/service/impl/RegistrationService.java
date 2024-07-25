@@ -57,8 +57,10 @@ public class RegistrationService implements IRegistrationService{
 		 
 		String token = confirmationTokenService.generateConfirmationToken(currentAccount);
 		
+		confirmAccount(token);
+		
 		emailTemplate.emailConfirm(currentAccount, appConstants.appConfirmUrl() + token);				 		  
-		 
+				
 		return currentAccount;
 		 
 	}

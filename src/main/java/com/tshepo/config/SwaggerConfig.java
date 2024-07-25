@@ -33,8 +33,8 @@ public class SwaggerConfig {
 	      "E-Commerce API.", 
 	      "1.0", 
 	      "Terms of service", 
-	      new Contact("Tshepo Mokoena", "www.tshepofficial.com", "tshepo.william3652@gmail.com"), 
-	      "License of API", "www.tshepofficial.com/license", Collections.emptyList());
+	      new Contact("Tshepo Mokoena", "tshepo-mokoena.web.app", "tshepo.william3652@gmail.com"), 
+	      "License of API", "tshepo-mokoena.web.app/license", Collections.emptyList());
 	}
 
 }

@@ -84,13 +84,16 @@ public class CartService implements ICartService{
 		Product product = productService.findByProductId(productId)
 				.orElseThrow(() -> new ItemNotFoundException(productId));
 		
-		Optional<CartItem> getCartItem = cartItemService.findByProduct(product);
 		
-		if (!getCartItem.isPresent())
-			throw new ItemNotFoundException(productId);
+		List<CartItem> cartItems = cartItemService.findByCart(cart);
 		
-		cartItemService.removeCartItem(getCartItem.get());
-		
+		for (CartItem cartItem : cartItems) {
+			
+			if ( cartItem.getProduct().getProductId().contains(product.getProductId()) )
+				cartItemService.removeCartItem(cartItem);
+			
+		}
+				
 		BigDecimal cartTotal = new BigDecimal(0);
 		
 		for (CartItem cartItem : cartItemService.findByCart(cart))
